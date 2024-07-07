@@ -1,0 +1,31 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.App {
+    max-width: 600px;
+    margin: 0 auto;
+    margin-top: 150px;
+}
+
+.post {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid rgb(84, 171, 84);
+    padding: 15px;
+}
+
+.post+.post {
+    margin-top: 15px;
+}
+
+.post__form {}
+
