@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { memo, useMemo, useState } from "react";
 import "./App.css"
 import { PostList } from "./components/postList/PostList";
+import { PostForm } from "./components/postForm/PostForm";
+import { PostFilter } from "./components/postFilter/PostFilter";
+import { Modal } from "./components/UI/modal/Modal";
 import { Button } from "./components/UI/button/Button";
-import { Input } from "./components/UI/input/Input";
 
 function App() {
 
@@ -11,43 +13,44 @@ function App() {
         { id: 2, title: 'title2', description: 'description2' }
     ])
 
-    const [title, setTitle] = useState('')
-    const [description, setDescription] = useState('')
-
-    console.log(title, description)
-
-
-    const addNewPost = (e) => {
-        e.preventDefault()
-        setPosts(prev => [...prev, { id: Date.now(), title, description }])
-        setTitle("")
-        setDescription("")
+    function createPost(post) {
+        setPosts([...posts, post])
+        setVisible(false)
     }
+
+    function removePost(id) {
+        setPosts(posts.filter(post => post.id !== id))
+    }
+
+    const [filter, setFilter] = useState({ sort: '', query: '' })
+
+    const sortedPosts = useMemo(() => {
+        if (filter.sort) {
+            return posts.toSorted((a, b) => a[filter.sort].localeCompare(b[filter.sort]))
+        }
+        return posts
+    }, [filter.sort, posts])
+
+    const sortedAndSearchedPosts = useMemo(() => {
+        return sortedPosts.filter(post => post.title.toLowerCase().includes(filter.query.toLowerCase()))
+    }, [filter.query, sortedPosts])
+
+    const [visible, setVisible] = useState(false)
 
     return (
         <div className="App">
 
-            <form onSubmit={e => addNewPost(e)} className="post__form">
-                <Input
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    type="text"
-                    placeholder="title"
-                />
-                <Input
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    type="text"
-                    placeholder="description"
-                />
-                <Button
-                    disabled={false}
-                >Создать
-                </Button>
-            </form>
+            <Modal visible={visible} setVisible={() => setVisible(!visible)}>
+                <PostForm create={createPost} />
+            </Modal>
 
-            <PostList posts={posts} />
+            <Button onClick={() => setVisible(true)}>Create posts</Button>
 
+            <hr />
+            <div>
+                <PostFilter filter={filter} setFilter={setFilter} />
+            </div>
+            <PostList posts={sortedAndSearchedPosts} remove={removePost} />
         </div>
     );
 }
