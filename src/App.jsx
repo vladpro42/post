@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
 import "./App.css"
+
+import { useEffect, useState } from "react";
 import { PostList } from "./components/postList/PostList";
 import { PostForm } from "./components/postForm/PostForm";
 import { PostFilter } from "./components/postFilter/PostFilter";
@@ -9,6 +10,8 @@ import { usePosts } from "./hooks/usePosts";
 import PostServis from "./API/PostService";
 import { Loader } from "./components/UI/loader/Loader";
 import { useFetching } from "./hooks/useFetching";
+import { getPageCount } from "./utils/pages";
+import { Pagination } from "./components/UI/pagination/Pagination";
 
 
 function App() {
@@ -17,11 +20,16 @@ function App() {
     const [filter, setFilter] = useState({ sort: '', query: '' })
     const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query)
     const [visible, setVisible] = useState(false)
+    const [totalPages, setTotalPages] = useState(0)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [limitPage, setLimitPage] = useState(10)
 
 
     let [fetchingPosts, isPostsLoading, postError] = useFetching(async () => {
-        const posts = await PostServis.getAll()
-        setPosts(posts)
+        const res = await PostServis.getAll(limitPage, currentPage)
+        setPosts(res.data)
+        const totalCount = res.headers['x-total-count']
+        setTotalPages(getPageCount(totalCount, limitPage))
     })
 
     function createPost(post) {
@@ -35,8 +43,12 @@ function App() {
 
     useEffect(() => {
         fetchingPosts()
-    }, [])
+    }, [currentPage])
 
+
+    function handlePageChange(page) {
+        setCurrentPage(page)
+    }
 
 
 
@@ -62,8 +74,9 @@ function App() {
                 isPostsLoading ? <Loader /> : <PostList posts={sortedAndSearchedPosts} remove={removePost} />
             }
 
+            <Pagination currentPage={currentPage} handlePageChange={handlePageChange} totalPages={totalPages} />
 
-        </div>
+        </div >
     );
 }
 
