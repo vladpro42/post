@@ -2,7 +2,6 @@ import { usePagination } from "../../../hooks/usePaginatiom"
 import { Button } from "../button/Button"
 
 export const Pagination = ({ totalPages, currentPage, handlePageChange }) => {
-
     const pagesArray = usePagination(totalPages)
 
     return <div>

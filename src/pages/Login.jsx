@@ -11,6 +11,7 @@ export function Login() {
     function login(e) {
         e.preventDefault();
         setIsAuth(true)
+        localStorage.setItem("isAuth", "true")
         nav('/posts')
     }
     return <div>
